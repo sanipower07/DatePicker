@@ -1,0 +1,102 @@
+﻿{% extends 'base.html' %}
+{% block content %}
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Für faule unorganisierte Fettsäcke <3</p>
+      <h1>Alle eure Date-Ideen an einem Ort.</h1>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <div class="card-header">Aktivität hinzufügen</div>
+      <form class="form" method="post" action="{{ url_for('add_activity') }}">
+        <label class="field">
+          <span>Name der Aktivität</span>
+          <input type="text" name="name" placeholder="Spaziergang bei Sonnenuntergang" required>
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="requires_money" value="1">
+          <span>Kostet Geld</span>
+        </label>
+        <button class="btn primary" type="submit">Zur Liste hinzufügen</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Lass das Los entscheiden</div>
+      <form class="form" method="post" action="{{ url_for('pick_activity') }}">
+        <div class="toggle">
+          <span>Haben wir gerade Budget?</span>
+          <div class="options">
+            <label class="chip">
+              <input type="radio" name="money_available" value="yes" checked>
+              <span>Ja</span>
+            </label>
+            <label class="chip">
+              <input type="radio" name="money_available" value="no">
+              <span>Nein</span>
+            </label>
+          </div>
+        </div>
+        <button class="btn" type="submit">Zufällig auswählen</button>
+      </form>
+      {% if picked_activity %}
+        <div class="picked">
+          <p class="eyebrow">Das Los</p>
+          <div class="picked-name">{{ picked_activity.name }}</div>
+          <div class="picked-meta">{{ 'Kostenlos' if not picked_activity.requires_money else 'Kann etwas kosten' }}</div>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="card list-card">
+    <div class="card-header">Unsere Liste</div>
+    {% if activities %}
+      <div class="table">
+        <div class="table-head">
+          <span>Name</span>
+          <span>Kostet Geld?</span>
+          <span>Hinzugefügt</span>
+          <span></span>
+        </div>
+        {% for activity in activities %}
+        <div class="table-row">
+          <span class="name">{{ activity.name }}</span>
+          <span>
+            {% if activity.requires_money %}
+              <span class="badge badge-money">Ja</span>
+            {% else %}
+              <span class="badge badge-free">Nein</span>
+            {% endif %}
+          </span>
+          <span class="muted">{{ activity.created_at.strftime('%d.%m.%Y') }}</span>
+          <span>
+            <form method="post" action="{{ url_for('delete_activity', activity_id=activity.id) }}" onsubmit="return confirm('Diese Aktivität löschen?');">
+              <button class="btn ghost" type="submit">Löschen</button>
+            </form>
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">Noch keine Aktivitäten gespeichert. Legt ein paar Ideen an.</p>
+    {% endif %}
+  </section>
+
+  <section class="card list-card">
+    <div class="card-header">Backup & Wiederherstellung</div>
+    <p class="muted">Ladet eine Sicherung herunter oder spielt eine vorhandene Sicherung wieder ein (praktisch nach einem Render-Deploy).</p>
+    <div class="backup-actions">
+      <a class="btn ghost" href="{{ url_for('backup') }}">Backup herunterladen</a>
+      <form class="restore-form" method="post" action="{{ url_for('restore') }}" enctype="multipart/form-data">
+        <label class="file-label">
+          <input type="file" name="backup" accept=".db">
+          <span>Datei wählen</span>
+        </label>
+        <button class="btn primary" type="submit">Backup einspielen</button>
+      </form>
+    </div>
+  </section>
+{% endblock %}
