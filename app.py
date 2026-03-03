@@ -115,7 +115,6 @@ def pick_activity():
         return redirect(url_for('home'))
 
     choice = random.choice(activities)
-    flash('Das Los sagt:', 'info')
     return redirect(url_for('home', picked=choice.id))
 
 
